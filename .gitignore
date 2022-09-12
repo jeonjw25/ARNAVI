@@ -1,0 +1,14 @@
+# ignore files except .cc & .h
+LDSO/build/
+LDSO/bin/
+LDSO/cmake/
+LDSO/thirdparty/
+LDSO/doc/
+LDSO/lib/
+LDSO/vocab/
+LDSO/*.sh
+LDSO/*.md
+LDSO/*.txt
+LDSO/Doxyfile
+LDSO/.gitignore
+
