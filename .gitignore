@@ -11,4 +11,4 @@ LDSO/*.md
 LDSO/*.txt
 LDSO/Doxyfile
 LDSO/.gitignore
-
+build/

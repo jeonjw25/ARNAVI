@@ -184,6 +184,7 @@ namespace ldso {
             if (val < 0) val = 0;
             image[i] = val;
         }
+        
     }
 
     template<typename T>
@@ -210,7 +211,7 @@ namespace ldso {
             if (setting_photometricCalibration == 2) {
                 for (int i = 0; i < wh; i++) {
                     if (!std::isinf(vignetteMapInv[i])) {
-                        data[i] *= vignetteMapInv[i];
+                        data[i] *= vignetteMapInv[i]; //distortion correction using vignett img
                     } else {
                         data[i] *= vignetteMapInv[i];
                     }
@@ -250,7 +251,7 @@ namespace ldso {
             return 0;
         }
 
-        printf(" ... found!\n");
+        printf(" ... found!\n"); //configFile -> camera.txt
         std::string l1;
         std::getline(f, l1);
         f.close();
@@ -258,7 +259,7 @@ namespace ldso {
         float ic[10];
 
         Undistort *u;
-
+        // different parameters for each camera model.
         // for backwards-compatibility: Use RadTan model for 8 parameters.
         if (std::sscanf(l1.c_str(), "%f %f %f %f %f %f %f %f",
                         &ic[0], &ic[1], &ic[2], &ic[3],
@@ -282,7 +283,7 @@ namespace ldso {
                     return 0;
                 }
             } else {
-                printf("found ATAN camera model, building rectifier.\n");
+                printf("found ATAN camera model, building rectifier.\n"); // TUM uses this.
                 u = new UndistortFOV(configFilename.c_str(), true);
                 if (!u->isValid()) {
                     delete u;
@@ -295,11 +296,11 @@ namespace ldso {
 
 
 
-            // clean model selection implementation.
+            // clean model selection implementation. 
         else if (std::sscanf(l1.c_str(), "KannalaBrandt %f %f %f %f %f %f %f %f",
                              &ic[0], &ic[1], &ic[2], &ic[3],
                              &ic[4], &ic[5], &ic[6], &ic[7]) == 8) {
-            u = new UndistortKB(configFilename.c_str(), false);
+            u = new UndistortKB(configFilename.c_str(), false); //no prefix.
             if (!u->isValid()) {
                 delete u;
                 return 0;
@@ -363,9 +364,9 @@ namespace ldso {
             exit(1);
         }
 
-        photometricUndist->processFrame<T>(image_raw->data, exposure, factor);
-        ImageAndExposure *result = new ImageAndExposure(w, h, timestamp);
-        photometricUndist->output->copyMetaTo(*result);
+        photometricUndist->processFrame<T>(image_raw->data, exposure, factor); //managing distortion
+        ImageAndExposure *result = new ImageAndExposure(w, h, timestamp); //create result plane
+        photometricUndist->output->copyMetaTo(*result); // output -> result
 
         if (!passthrough) {
             float *out_data = result->image;
@@ -373,6 +374,7 @@ namespace ldso {
 
             float *noiseMapX = 0;
             float *noiseMapY = 0;
+            //memory management for noise
             if (benchmark_varNoise > 0) {
                 int numnoise = (benchmark_noiseGridsize + 8) * (benchmark_noiseGridsize + 8);
                 noiseMapX = new float[numnoise];
@@ -455,7 +457,7 @@ namespace ldso {
 
         return result;
     }
-
+//////////////////////////////////////////////////////////9.20//////////////////////////////////////////////////////////////
     template ImageAndExposure *
     Undistort::undistort<unsigned char>(const MinimalImage<unsigned char> *image_raw, float exposure, double timestamp,
                                         float factor) const;
